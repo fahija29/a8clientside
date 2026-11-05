@@ -114,11 +114,11 @@ function LoginForm() {
         </div>
 
         <div className="mt-6 flex items-center gap-3">
-          <span className="h-px flex-1 bg-white/10" />
+          <span className="h-px flex-1 bg-slate-200 dark:bg-white/10" />
           <span className="text-xs font-medium uppercase tracking-widest text-slate-500">
             or
           </span>
-          <span className="h-px flex-1 bg-white/10" />
+          <span className="h-px flex-1 bg-slate-200 dark:bg-white/10" />
         </div>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">

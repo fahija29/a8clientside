@@ -129,7 +129,7 @@
   }
 }
 
-/* Banner slider (Swiper) — orange pill dots matching the hero design. */
+/* Banner slider (Swiper) — soft green pill dots matching the mint hero. */
 .banner .swiper-pagination {
   bottom: 20px;
 }
@@ -138,16 +138,64 @@
   width: 8px;
   height: 8px;
   border-radius: 9999px;
-  background: rgb(255 255 255 / 0.4);
+  background: rgb(6 78 59 / 0.25);
   opacity: 1;
   transition: all 0.3s ease;
 }
 
 .banner .swiper-pagination-bullet:hover {
-  background: rgb(255 255 255 / 0.6);
+  background: rgb(6 78 59 / 0.45);
 }
 
 .banner .swiper-pagination-bullet-active {
   width: 24px;
-  background: #fb923c;
+  background: #059669;
+}
+
+/* Dark theme: dots switch to light emerald so they stay visible on the
+   darkened mint slides. */
+.dark .banner .swiper-pagination-bullet {
+  background: rgb(16 185 129 / 0.4);
+}
+
+.dark .banner .swiper-pagination-bullet:hover {
+  background: rgb(16 185 129 / 0.65);
+}
+
+.dark .banner .swiper-pagination-bullet-active {
+  background: #34d399;
+}
+
+/* Scrollbar follows the theme (WebKit + Firefox). */
+html {
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgb(100 116 139 / 0.4);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(100 116 139 / 0.6);
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: rgb(16 185 129 / 0.3);
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgb(16 185 129 / 0.5);
 }

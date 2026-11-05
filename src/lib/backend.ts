@@ -5,7 +5,9 @@
 
 import { decodeTitle, type Book } from "@/lib/books";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const API_URL = (
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000"
+).replace(/\/+$/, "");
 
 /** Base URL of the Express backend, for plain (non-authed) public calls. */
 export function apiUrl(path: string) {
