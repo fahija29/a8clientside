@@ -243,9 +243,8 @@ function AddBookForm() {
       console.error("Add book request failed:", error);
 
       setError(
-        "The library server rejected the request. Check that the server is " +
-          "running and that you are browsing via http://localhost:3000 (its " +
-          "allow-listed address), then try again."
+        "The library server rejected the request. Please try again in a " +
+          "moment — if it keeps failing, the server may be unreachable."
       );
     } finally {
       setBusy(null);

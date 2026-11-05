@@ -5,9 +5,11 @@
 
 import { decodeTitle, type Book } from "@/lib/books";
 
-const API_URL = (
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000"
-).replace(/\/+$/, "");
+// Base URL comes only from the environment (NEXT_PUBLIC_API_URL in
+// .env.local locally / the deployed URL in Vercel's project settings) —
+// never hardcoded. Trailing slashes are trimmed so `${API_URL}/path`
+// never produces a double slash.
+const API_URL = (process.env.NEXT_PUBLIC_API_URL ?? "").replace(/\/+$/, "");
 
 /** Base URL of the Express backend, for plain (non-authed) public calls. */
 export function apiUrl(path: string) {
