@@ -234,10 +234,18 @@ function AddBookForm() {
       if (fileInput) {
         fileInput.value = "";
       }
-    } catch {
+    } catch (error) {
       // The Express backend could not be reached (or the token call failed).
+      // Log the raw error so the dev console shows the real cause (CORS
+      // mismatch, connection refused, token endpoint failure…), and surface
+      // a message that covers the candidates instead of blaming a running
+      // server that is actually fine.
+      console.error("Add book request failed:", error);
+
       setError(
-        "Could not reach the library server. Please make sure it is running and try again."
+        "The library server rejected the request. Check that the server is " +
+          "running and that you are browsing via http://localhost:3000 (its " +
+          "allow-listed address), then try again."
       );
     } finally {
       setBusy(null);

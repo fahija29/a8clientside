@@ -165,7 +165,9 @@ function MyBorrowsContent() {
             ),
           });
         }
-      } catch {
+      } catch (error) {
+        console.error("Return borrow request failed:", error);
+
         setToast({
           type: "error",
           title: "Return not completed",

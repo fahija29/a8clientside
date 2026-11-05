@@ -397,9 +397,15 @@ function EditBookModal({
         title: "Book updated",
         message: `“${decodeTitle(patch.title)}” was updated successfully.`,
       });
-    } catch {
+    } catch (error) {
+      // The Express backend could not be reached — log the raw failure so
+      // the console shows the real cause (CORS, refused connection, …).
+      console.error("Update book request failed:", error);
+
       setError(
-        "Could not reach the library server. Please make sure it is running and try again."
+        "The library server rejected the request. Check that the server is " +
+          "running and that you are browsing via http://localhost:3000, then " +
+          "try again."
       );
     }
 
@@ -608,12 +614,14 @@ function DeleteBookModal({
 
           return;
         }
-      } catch {
+      } catch (error) {
+        console.error("Delete book request failed:", error);
+
         onToast({
           type: "error",
           title: "Delete not completed",
           message:
-            "Could not reach the library server. Please make sure it is running and try again.",
+            "The library server rejected the request. Check that the server is running and that you are browsing via http://localhost:3000, then try again.",
         });
         setBusy(false);
 
