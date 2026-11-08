@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import type { Book } from "@/lib/books";
+import { isBotCheckBook, type Book } from "@/lib/books";
 import { getMongoClient } from "@/lib/mongo";
 
 // GET /api/books/detail?title=... — resolves a single book from the MongoDB
@@ -38,7 +38,13 @@ export async function GET(request: Request) {
       }
     );
 
-    if (!doc) {
+    if (!doc || isBotCheckBook({
+      title: String(doc.title ?? title),
+      author: String(doc.author ?? ""),
+      addedBy: doc.addedBy as { name?: string } | undefined,
+    })) {
+      // Bot probe titles are not real catalog entries (the details page
+      // falls back to a locally synthesized record, so it still renders).
       return NextResponse.json({ book: null });
     }
 

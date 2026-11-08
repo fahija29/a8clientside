@@ -47,6 +47,29 @@ export function decodeTitle(raw: string) {
   }
 }
 
+/**
+ * Deployment checker bots ("E2E Deployment Check <ms> by E2E Bot",
+ * "Prodcheck <ms> by Deploy Bot") add throwaway probe books through the
+ * real Add Book flow on every deployment. They are not real library
+ * entries, so every read path (All Books, New Arrivals, details lookup)
+ * filters them out via isBotCheckBook(). The title's trailing number is
+ * the bot's run timestamp in milliseconds.
+ */
+const BOT_CHECK_TITLE_RE = /^(prodcheck|e2e deployment check)\s+\d{10,}$/i;
+const BOT_CHECK_OWNER_RE = /deploy bot|e2e bot/i;
+
+export function isBotCheckBook(book: {
+  title: string;
+  author: string;
+  addedBy?: { name?: string } | null | undefined;
+}): boolean {
+  return (
+    BOT_CHECK_TITLE_RE.test(book.title ?? "") ||
+    BOT_CHECK_OWNER_RE.test(book.author ?? "") ||
+    BOT_CHECK_OWNER_RE.test(book.addedBy?.name ?? "")
+  );
+}
+
 export const sampleBooks: Book[] = [
   {
     title: "The Hobbit",

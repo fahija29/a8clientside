@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { sampleBooks, type Book } from "@/lib/books";
+import { sampleBooks, isBotCheckBook, type Book } from "@/lib/books";
 import { getMongoClient } from "@/lib/mongo";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -50,10 +50,15 @@ type BookDoc = {
   image?: string;
 };
 
+// Deployment-checker bots add "Prodcheck <ms>" / "E2E Deployment Check <ms>"
+// probe books through the Add Book flow on every deployment; they must
+// never crowd out real New Arrivals (from the rows or the total count).
+const botCheckFilter = {
+  title: { $not: /^(prodcheck|e2e deployment check)\s+\d{10,}\s*$/i },
+};
+
 const docs = await books
-  .find<BookDoc>(
-    {},
-    {
+  .find<BookDoc>({ ...botCheckFilter }, {
       projection: {
         title: 1,
         author: 1,
@@ -69,13 +74,17 @@ const docs = await books
 
 return NextResponse.json({
   source: "mongodb" as const,
-  count: await books.countDocuments({}),
-  books: docs.map((doc) => ({
-    title: String(doc.title ?? "Untitled"),
-    author: String(doc.author ?? "Unknown"),
-    category: String(doc.category ?? "General"),
-    image: String(doc.image ?? ""),
-  })),
+  count: await books.countDocuments(botCheckFilter),
+  books: docs
+    .map((doc) => ({
+      title: String(doc.title ?? "Untitled"),
+      author: String(doc.author ?? "Unknown"),
+      category: String(doc.category ?? "General"),
+      image: String(doc.image ?? ""),
+    }))
+    // Belt and braces: also drop bot probe books that slip past the
+    // query filter (e.g. stored under a slightly different title).
+    .filter((book) => !isBotCheckBook(book)),
 });
 
 

@@ -3,7 +3,7 @@
 // token — a short-lived JWT signed via Better Auth. The Better Auth session
 // cookie authorizes minting one, so these helpers only work while signed in.
 
-import { decodeTitle, type Book } from "@/lib/books";
+import { decodeTitle, isBotCheckBook, type Book } from "@/lib/books";
 
 // Base URL comes only from the environment (NEXT_PUBLIC_API_URL in
 // .env.local locally / the deployed URL in Vercel's project settings) —
@@ -106,7 +106,12 @@ export async function fetchAllBooks(): Promise<ApiBook[] | null> {
       return null;
     }
 
-    return data.map((book) => ({
+    // Deployment-checker probe books ("Prodcheck <ms>" by Deploy Bot, etc.)
+    // are added by bots on every deployment; they are not library entries
+    // and must never surface in any list.
+    return data
+      .filter((book) => !isBotCheckBook(book))
+      .map((book) => ({
       ...book,
       title: decodeTitle(book.title),
       _id: typeof book._id === "string" ? book._id : undefined,
