@@ -29,11 +29,17 @@ const db = client.db("BookNook");
 const books = db.collection("books");
 
 
-// First run on an empty database: seed the mock catalog so there is
-// something to sort. Earlier entries get newer addedAt timestamps.
+// First run on an empty database: optionally seed the mock catalog so
+// there is something to sort. Seeding is OPT-IN via BOOKNOOK_SEED=1 and
+// is deliberately NOT enabled on the Vercel deployment — a public
+// endpoint must never auto-add catalog rows on a fresh/empty production
+// database (that is how bot/AI junk gets a free ride in). Seed locally:
+// set BOOKNOOK_SEED=1 in .env.local, hit the endpoint once, then the
+// collection is populated and the flag can be removed. Earlier entries
+// get newer addedAt timestamps.
 const count = await books.countDocuments({});
 
-if (count === 0) {
+if (count === 0 && process.env.BOOKNOOK_SEED === "1") {
   await books.insertMany(
     sampleBooks.map((book, index) => ({
       ...book,

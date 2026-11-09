@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { createContext, useCallback, useContext, type ReactNode } from "react";
 
 import { authClient } from "@/lib/auth-client";
@@ -62,8 +61,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { data: session, isPending, refetch } = authClient.useSession();
   const user = toAuthUser(session?.user);
 
-  const router = useRouter();
-
   const updateUser = useCallback(
     async (patch: Partial<AuthUser>) => {
       if (patch.name === undefined && patch.photo === undefined) {
@@ -96,9 +93,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     // Logout ALWAYS lands the reader on the home page, no matter which
-    // page they logged out from (details, my-books, my-profile, …).
-    router.push("/");
-  }, [router]);
+    // page they logged out from (details, my-books, my-profile, …). A full
+    // page load (window.location) is used on purpose rather than a
+    // client-side router.push: signing out makes the current private
+    // page's auth gate fire (its session just vanished) and that gate's
+    // redirect to /login races the push — the hard load goes straight
+    // home and the login page never flashes.
+    window.location.replace("/");
+  }, []);
 
   return (
     <AuthContext.Provider

@@ -1,0 +1,44 @@
+#!/bin/sh
+# ————————————————————————————————————————————————————————————
+# BookNook commit guard — ONLY the repository owner commits.
+#
+# Blocks `git commit` when an AI/agent session is detected (Claude Code,
+# OpenCode, Cursor agent, Copilot agent, Aider, Windsurf, Replit, …) by
+# checking the environment variables those tools set. The owner's own
+# terminal (VS Code / Git Bash, no agent variables) passes untouched.
+#
+# Wired up with:  git config core.hooksPath .githooks   (or: npm run setup:hooks)
+# Bypassing is possible locally with --no-verify — real enforcement for
+# GitHub lives in the repo's branch rules (owner-only pushes).
+# ————————————————————————————————————————————————————————————
+
+AGENT_VARS="
+CLAUDECODE
+CLAUDE_CODE_ENTRYPOINT
+OPENCODE
+OPENCODE_SESSION_ID
+OPENCODE_TERMINAL
+AI_AGENT
+AGENT
+CURSOR_AGENT
+CURSOR_TRACE_ID
+COPILOT_AGENT
+COPILOT_AGENT_SESSION
+WINDSURF_AGENT
+AIDER_MODEL
+REPLIT_AGENT
+"
+
+for var in $AGENT_VARS; do
+  if [ -n "$(printenv "$var")" ]; then
+    echo ""
+    echo "  ✖  Commit blocked — AI/agent session detected (env: $var)."
+    echo "     Only the repository owner (fahija29) commits to this project."
+    echo "     Commit yourself from your own terminal:"
+    echo '       git add -A && git commit -m "your message" && git push'
+    echo ""
+    exit 1
+  fi
+done
+
+exit 0
