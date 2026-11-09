@@ -12,6 +12,10 @@
 
 There are no tests and no CI. Verify changes with `npm run build` and `npm run lint`.
 
+## STRICT RULE — no test writes to production
+
+Do **not** verify deployments or test features against the deployed app by creating throwaway accounts (e.g. `prodtest…@booknook.test`, `e2echeck…@booknook.test`) or publishing test books (titles like "Prodcheck …", "E2E Deployment Check …", "Flowcheck …"). The deployed app is production with a real user base, and such entries surface to the user as unwanted bot activity. Verify deployments with **read-only requests only** (`GET /api/books/latest` against the deployed backend is sufficient), and exercise any writes only against a local dev server with local data.
+
 ## Stack quirks
 
 - Next.js 16 (App Router) + React 19 with `reactCompiler: true` in `next.config.ts` — don't add manual `useMemo`/`useCallback` memoization.
