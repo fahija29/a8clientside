@@ -161,24 +161,24 @@ function RegisterForm() {
 
     setSubmitting(false);
 
-    // A short beat so the success toast is visible before the redirect.
-    // Registration also signs the reader in, so they go straight back to
-    // the route they came from (remembered in booknook-next) — or home.
+    // Spec flow: a successful registration hands the reader to the Login
+    // page — the just-started session is ended so logging in is genuinely
+    // required. Any remembered "booknook-next" destination stays intact,
+    // so the following login still returns them to the page they were
+    // originally headed to.
     setToast({
       type: "success",
       title: "Registration successful",
-      message: "Account created — taking you right back to browsing…",
+      message: "Account created — taking you to the login page…",
     });
 
-    window.setTimeout(() => {
-      try {
-        const next = sessionStorage.getItem("booknook-next");
-        sessionStorage.removeItem("booknook-next");
-        router.push(next || "/");
-      } catch {
-        router.push("/");
-      }
-    }, 1100);
+    try {
+      await authClient.signOut();
+    } catch {
+      // The account exists either way; worst case the session lingers.
+    }
+
+    window.setTimeout(() => router.push("/login"), 1100);
   }
 
   return (

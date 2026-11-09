@@ -5,13 +5,14 @@
 
 import { decodeTitle, isBotCheckBook, type Book } from "@/lib/books";
 
-// Base URL comes only from the environment (NEXT_PUBLIC_API_URL in
-// .env.local locally / the deployed URL in Vercel's project settings) —
-// never hardcoded. Trailing slashes are trimmed so `${API_URL}/path`
-// never produces a double slash.
-const API_URL = (process.env.NEXT_PUBLIC_API_URL ?? "").replace(/\/+$/, "");
+// The browser never talks to the backend directly: every call goes to the
+// same-origin /api/library/* prefix, and the Next.js server (src/proxy.ts)
+// forwards it to the Express backend — whose URL lives only in the
+// backend-only LIBRARY_API_URL env var, so the backend has no existence
+// (no URL, no env reference) anywhere in client code.
+const API_URL = "/api/library";
 
-/** Base URL of the Express backend, for plain (non-authed) public calls. */
+/** Same-origin proxy prefix the Next.js server forwards to the backend. */
 export function apiUrl(path: string) {
   return `${API_URL}${path}`;
 }

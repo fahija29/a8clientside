@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import RequireAuth from "@/components/auth/RequireAuth";
 import BookDetails from "./details";
 
 export default function BookDetailsRoute({
@@ -20,5 +21,12 @@ async function DetailsSection({
 }) {
   const { title } = await params;
 
-  return <BookDetails title={title} />;
+  // Book Details is a private route — signed-out visitors are sent to
+  // /login (the server proxy in src/proxy.ts already bounces them before
+  // this renders; RequireAuth is the client-side second layer).
+  return (
+    <RequireAuth>
+      <BookDetails title={title} />
+    </RequireAuth>
+  );
 }

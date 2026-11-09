@@ -143,7 +143,7 @@ export default function BooksPage() {
           {filteredBooks.length} {filteredBooks.length === 1 ? "book" : "books"}
         </p>
 
-        <div className="mt-6 grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-5">
+        <div className="mt-6 grid grid-cols-2 gap-5 sm:grid-cols-3">
           {filteredBooks.map((book) => (
             <article
               key={book.title}

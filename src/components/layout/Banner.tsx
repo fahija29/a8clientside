@@ -359,7 +359,7 @@ const slides = [
     eyebrow: null,
     title: "Borrow and Read",
     description: "Thousands of titles at your fingertips. Sustainable and convenient.",
-    cta: "Explore Collection",
+    cta: "Browse Books",
     bg: "bg-gradient-to-r from-emerald-100 via-emerald-50 to-white dark:from-[#0e2015] dark:via-[#122419] dark:to-[#0b150f]",
     text: "text-slate-900 dark:text-white",
     sub: "text-slate-600 dark:text-slate-400",
@@ -375,7 +375,7 @@ const slides = [
     eyebrow: null,
     title: "Discover Your Next Favorite Book",
     description: "Curated collections and personalized recommendations just for you.",
-    cta: "Start Reading Now",
+    cta: "Browse Books",
     bg: "bg-gradient-to-br from-emerald-100 via-emerald-50 to-teal-50 dark:from-[#122419] dark:via-[#0e2015] dark:to-[#0c1a14]",
     text: "text-slate-900 dark:text-white",
     sub: "text-slate-600 dark:text-slate-400",
@@ -419,7 +419,7 @@ export function BannerFallback() {
             href="/books"
             className="mt-8 inline-flex items-center rounded-lg bg-emerald-400 px-5 py-2.5 text-sm font-semibold text-emerald-950 transition hover:bg-emerald-300"
           >
-            Explore Collection
+            Browse Books
           </Link>
           <p className="mt-5 flex items-center gap-3 text-xs tracking-wide text-slate-500 dark:text-slate-400">
             <span className="h-px w-6 bg-slate-400/50 dark:bg-white/15" />

@@ -41,6 +41,23 @@ function LoginForm() {
     return () => window.clearTimeout(timer);
   }, [toast]);
 
+  // The server proxy (src/proxy.ts) bounces signed-out visitors here as
+  // /login?next=… — remember that destination the same way RequireAuth
+  // stores booknook-next, so signing in returns the reader to the page
+  // they were headed to. Only same-app paths are accepted (no open
+  // redirects via "//" protocol-relative URLs).
+  useEffect(() => {
+    try {
+      const next = new URLSearchParams(window.location.search).get("next");
+
+      if (next?.startsWith("/") && !next.startsWith("//")) {
+        sessionStorage.setItem("booknook-next", next);
+      }
+    } catch {
+      // Storage unavailable — login simply lands on the home page.
+    }
+  }, []);
+
   function fail(message: string) {
     setToast({
       type: "error",

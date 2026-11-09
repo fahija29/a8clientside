@@ -14,7 +14,7 @@ count: sampleBooks.length,
 }
 
 export async function GET(request: Request) {
-// /api/books/latest?limit=10 — the homepage shows 2 rows of 5.
+// /api/books/latest?limit=6 — the homepage shows 2 rows of 3.
 const limit = Math.min(
 20,
 Math.max(
