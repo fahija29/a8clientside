@@ -54,7 +54,7 @@ export default function LatestBooks() {
         if (active) {
           setBooks(
             sampleBooks
-              .slice(0, 6)
+              .slice(0, 10)
               .map((book) => ({ ...book, title: decodeTitle(book.title) }))
           );
           setFellBack(true);

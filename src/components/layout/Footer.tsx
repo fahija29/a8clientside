@@ -63,11 +63,14 @@ const YoutubeIcon = ({ size = 17 }: { size?: number }) => (
   </SocialGlyph>
 );
 
+// Show-only social icons — the owner asked for them to be decorative
+// ("just for show, do not make it working"), so they render as plain
+// spans: no href, no navigation, no link semantics.
 const socialLinks = [
-  { href: "https://facebook.com", label: "Facebook", icon: FacebookIcon },
-  { href: "https://instagram.com", label: "Instagram", icon: InstagramIcon },
-  { href: "https://x.com", label: "X (formerly Twitter)", icon: XIcon },
-  { href: "https://youtube.com", label: "YouTube", icon: YoutubeIcon },
+  { label: "Facebook", icon: FacebookIcon },
+  { label: "Instagram", icon: InstagramIcon },
+  { label: "X (formerly Twitter)", icon: XIcon },
+  { label: "YouTube", icon: YoutubeIcon },
 ];
 
 const contactLinks = [
@@ -135,16 +138,14 @@ export default function Footer() {
                 const Icon = item.icon;
 
                 return (
-                  <a
+                  <span
                     key={item.label}
-                    href={item.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={item.label}
-                    className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition hover:border-emerald-500/50 hover:bg-emerald-600 hover:text-white dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:border-emerald-400/50"
+                    title={item.label}
+                    aria-hidden="true"
+                    className="flex h-10 w-10 cursor-default items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition hover:border-emerald-500/50 hover:bg-emerald-600 hover:text-white dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:border-emerald-400/50"
                   >
                     <Icon size={17} />
-                  </a>
+                  </span>
                 );
               })}
             </div>

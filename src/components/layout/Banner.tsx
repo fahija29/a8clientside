@@ -402,52 +402,81 @@ const slides = [
   },
 ];
 
-// Static server-renderable shell shown while the streamed Swiper hero hydrates;
-// it matches the first slide so there is no visual jump. It also warms the
-// cover CDN and starts slide-1 cover downloads at HTML parse time — before
-// any JavaScript runs — so the book covers are already on screen (or in
-// cache) the moment the slider fades in. React hoists the <link> tags
-// into <head>.
+// Static server-renderable replica of slide 1, shown while the streamed
+// Swiper hero hydrates. Rendering the real cover tiles as plain <img>s in
+// the shell means the browser downloads them at HTML parse time — long
+// before Swiper mounts — so covers are already on screen (or in cache) the
+// moment the slider fades in. (Manually hoisted <link rel="preload"> hints
+// are dropped by React 19's dedupe against same-src <img> tags, so the
+// shell tiles are the reliable way to front-run the fetch.) The hydrated
+// slider renders the identical slide-1 markup, so the swap is seamless and
+// every image comes back from cache with no loading gap.
 export function BannerFallback() {
+  const slide = slides[0];
   return (
-    <>
-      <link rel="preconnect" href="https://covers.openlibrary.org" />
+    <section className="relative h-[480px] overflow-hidden sm:h-[540px]">
+      <div className={`absolute inset-0 ${slide.bg}`}>
+        {/* Soft decorative blobs (match the live slide) */}
+        <div className="absolute -left-10 top-8 h-40 w-40 rounded-full bg-emerald-200/50 blur-2xl dark:bg-emerald-900/20" />
+        <div className="absolute bottom-0 right-1/4 h-48 w-48 rounded-full bg-teal-200/40 blur-3xl dark:bg-teal-900/20" />
 
-      {[
-        IMAGES.hiddenTrees,
-        IMAGES.nameOfWind,
-        IMAGES.midnightLibrary,
-        IMAGES.lotr,
-        IMAGES.honor,
-        IMAGES.sweetgrass,
-        IMAGES.silentPatient,
-      ].map((src) => (
-        <link key={src} rel="preload" as="image" href={src} />
-      ))}
+        <div className="relative flex h-full flex-col md:flex-row">
+          {/* Text panel */}
+          <div className="flex flex-1 items-center">
+            <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+              <div className="max-w-md md:pr-8">
+                {slide.eyebrow ? (
+                  <p className="text-xs font-semibold uppercase tracking-[0.25em] text-emerald-700">
+                    {slide.eyebrow}
+                  </p>
+                ) : null}
 
-      <section className="relative h-[480px] overflow-hidden bg-gradient-to-r from-emerald-100 via-emerald-50 to-white sm:h-[540px] dark:from-[#0e2015] dark:via-[#122419] dark:to-[#0b150f]">
-      <div className="relative mx-auto flex h-full max-w-7xl items-center px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md">
-          <h1 className="font-serif text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl dark:text-white">
-            Borrow and Read
-          </h1>
-          <p className="mt-4 text-sm leading-6 text-slate-600 dark:text-slate-400">
-            Thousands of titles at your fingertips. Sustainable and convenient.
-          </p>
-          <Link
-            href="/books"
-            className="mt-8 inline-flex items-center rounded-lg bg-emerald-400 px-5 py-2.5 text-sm font-semibold text-emerald-950 transition hover:bg-emerald-300"
+                <h1
+                  className={`mt-3 font-serif text-4xl font-bold leading-[1.08] tracking-tight sm:text-5xl ${slide.text}`}
+                >
+                  {slide.title}
+                </h1>
+
+                <p className={`mt-5 max-w-sm text-sm leading-6 ${slide.sub}`}>
+                  {slide.description}
+                </p>
+
+                <Link
+                  href="/books"
+                  className={`mt-8 inline-flex items-center rounded-lg px-5 py-2.5 text-sm font-semibold shadow-sm transition ${slide.button}`}
+                >
+                  {slide.cta}
+                </Link>
+
+                {slide.meta ? (
+                  <p className="mt-5 flex items-center gap-3 text-xs tracking-wide text-slate-500 dark:text-slate-400">
+                    <span className="h-px w-6 bg-slate-400/50 dark:bg-white/15" />
+                    {slide.meta}
+                  </p>
+                ) : null}
+              </div>
+            </div>
+          </div>
+
+          {/* Visual panel — real cover <img>s, downloaded with the HTML */}
+          <div
+            className={`relative min-h-0 flex-1 overflow-hidden md:mt-6 md:mb-10 ${slide.visualBg}`}
           >
-            Browse Books
-          </Link>
-          <p className="mt-5 flex items-center gap-3 text-xs tracking-wide text-slate-500 dark:text-slate-400">
-            <span className="h-px w-6 bg-slate-400/50 dark:bg-white/15" />
-            2,400+ titles in the collection
-          </p>
+            {slide.visual}
+
+            {slide.note ? (
+              <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-3 px-4">
+                <span className="h-px w-10 bg-slate-400/40" />
+                <span className="whitespace-nowrap font-serif text-xs italic text-slate-500 dark:text-slate-400">
+                  {slide.note}
+                </span>
+                <span className="h-px w-10 bg-slate-400/40 dark:bg-white/15" />
+              </div>
+            ) : null}
+          </div>
         </div>
       </div>
     </section>
-    </>
   );
 }
 

@@ -42,6 +42,25 @@ export function proxy(request: NextRequest) {
 
   // --- 1. API proxy: /api/library/* -> the Express backend --------------
   if (pathname.startsWith("/api/library")) {
+    // Write-protection, first line: every mutation (POST/PATCH/DELETE)
+    // must carry a Better Auth session cookie. Deployment-checker bots
+    // ("Prodcheck …" by Deploy Bot, "E2E Deployment Check …" by E2E Bot)
+    // and AI crawlers have no session, so their junk requests are
+    // answered here and never reach the backend — the bot-added-book
+    // problem is cut off at the source. The backend's own JWT check on
+    // write routes stays as the second layer.
+    if (
+      request.method !== "GET" &&
+      request.method !== "HEAD" &&
+      request.method !== "OPTIONS" &&
+      !hasSessionCookie(request)
+    ) {
+      return NextResponse.json(
+        { success: false, message: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
     if (!BACKEND_URL) {
       // No backend configured — answer with JSON so the pages' existing
       // !response.ok handling falls back to the offline/local data.
@@ -67,14 +86,20 @@ export function proxy(request: NextRequest) {
     PRIVATE_PAGES.has(path) || /^\/books\/.+/.test(path);
 
   if (isPrivate && !hasSessionCookie(request)) {
-    const login = new URL("/login", request.url);
+    // Book details (reached via the cards' "View Details") gets a
+    // friendlier interstitial: a "Please login first" page offering
+    // Login and Register. The other private pages are navbar entries,
+    // so they go straight to /login. Both carry the destination along —
+    // the login page folds it into the booknook-next sessionStorage key
+    // so sign-in returns the reader to the page they were headed to.
+    const target = new URL(
+      /^\/books\/.+/.test(path) ? "/please-login" : "/login",
+      request.url
+    );
 
-    // Carry the destination along; the login page folds it into the
-    // booknook-next sessionStorage key so sign-in returns the reader
-    // to the page they were headed to.
-    login.searchParams.set("next", `${pathname}${search}`);
+    target.searchParams.set("next", `${pathname}${search}`);
 
-    return NextResponse.redirect(login);
+    return NextResponse.redirect(target);
   }
 
   return NextResponse.next();
