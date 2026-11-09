@@ -403,10 +403,29 @@ const slides = [
 ];
 
 // Static server-renderable shell shown while the streamed Swiper hero hydrates;
-// it matches the first slide so there is no visual jump.
+// it matches the first slide so there is no visual jump. It also warms the
+// cover CDN and starts slide-1 cover downloads at HTML parse time — before
+// any JavaScript runs — so the book covers are already on screen (or in
+// cache) the moment the slider fades in. React hoists the <link> tags
+// into <head>.
 export function BannerFallback() {
   return (
-    <section className="relative h-[480px] overflow-hidden bg-gradient-to-r from-emerald-100 via-emerald-50 to-white sm:h-[540px] dark:from-[#0e2015] dark:via-[#122419] dark:to-[#0b150f]">
+    <>
+      <link rel="preconnect" href="https://covers.openlibrary.org" />
+
+      {[
+        IMAGES.hiddenTrees,
+        IMAGES.nameOfWind,
+        IMAGES.midnightLibrary,
+        IMAGES.lotr,
+        IMAGES.honor,
+        IMAGES.sweetgrass,
+        IMAGES.silentPatient,
+      ].map((src) => (
+        <link key={src} rel="preload" as="image" href={src} />
+      ))}
+
+      <section className="relative h-[480px] overflow-hidden bg-gradient-to-r from-emerald-100 via-emerald-50 to-white sm:h-[540px] dark:from-[#0e2015] dark:via-[#122419] dark:to-[#0b150f]">
       <div className="relative mx-auto flex h-full max-w-7xl items-center px-4 sm:px-6 lg:px-8">
         <div className="max-w-md">
           <h1 className="font-serif text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl dark:text-white">
@@ -428,6 +447,7 @@ export function BannerFallback() {
         </div>
       </div>
     </section>
+    </>
   );
 }
 

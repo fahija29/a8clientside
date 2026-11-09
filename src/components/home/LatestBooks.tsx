@@ -35,7 +35,7 @@ export default function LatestBooks() {
 
     async function loadLatestBooks() {
       try {
-        const response = await fetch("/api/books/latest?limit=6");
+        const response = await fetch("/api/books/latest?limit=10");
 
         if (!response.ok) {
           throw new Error(`Failed to load books (${response.status})`);
@@ -83,8 +83,8 @@ export default function LatestBooks() {
         </div>
 
         {books === null ? (
-          <div className="mt-12 grid grid-cols-2 gap-5 sm:grid-cols-3">
-            {[0, 1, 2, 3, 4, 5].map((i) => (
+          <div className="mt-12 grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-5">
+            {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => (
               <BookCardSkeleton key={i} />
             ))}
           </div>
@@ -97,7 +97,7 @@ export default function LatestBooks() {
               </p>
             )}
 
-            <div className="mt-12 grid grid-cols-2 gap-5 sm:grid-cols-3">
+            <div className="mt-12 grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-5">
               {books.map((book) => (
                 <article
                   key={book.title}
