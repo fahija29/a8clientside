@@ -35,6 +35,23 @@ function RegisterForm() {
   /** Password policy failures, rendered under the password field. */
   const [passwordError, setPasswordError] = useState("");
 
+  // The server proxy and the "Please login first" page can hand a desired
+  // destination over as ?next=… — remember it exactly like the login page
+  // does, so after registration the reader lands on the page they were
+  // originally headed to (e.g. the book details they tapped). Only
+  // same-app paths are accepted (no open redirects via "//" URLs).
+  useEffect(() => {
+    try {
+      const next = new URLSearchParams(window.location.search).get("next");
+
+      if (next?.startsWith("/") && !next.startsWith("//")) {
+        sessionStorage.setItem("booknook-next", next);
+      }
+    } catch {
+      // Storage unavailable — registration simply lands on the home page.
+    }
+  }, []);
+
   // Toasts dismiss themselves, matching the page's playful tone.
   useEffect(() => {
     if (!toast) {
