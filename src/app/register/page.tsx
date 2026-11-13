@@ -52,6 +52,17 @@ function RegisterForm() {
     }
   }, []);
 
+  // A validated same-app destination from ?next=…, or "" when absent.
+  function nextFromUrl() {
+    try {
+      const next = new URLSearchParams(window.location.search).get("next");
+
+      return next?.startsWith("/") && !next.startsWith("//") ? next : "";
+    } catch {
+      return "";
+    }
+  }
+
   // Toasts dismiss themselves, matching the page's playful tone.
   useEffect(() => {
     if (!toast) {
@@ -182,22 +193,36 @@ function RegisterForm() {
     // signs the reader in (Better Auth starts the session), so — exactly
     // like login — they go straight back to where they tapped from: the
     // book details they wanted (booknook-next, stashed by the
-    // "Please login first" page), or the home page.
+    // "Please login first" page), or the home page. No login step needed —
+    // the session already started with sign-up.
     setToast({
       type: "success",
       title: "Registration successful",
       message: "Account created — you're signed in, taking you back…",
     });
 
+    // Brief pause only so the success toast is readable, then go.
     window.setTimeout(() => {
+      let next = "";
+
       try {
-        const next = sessionStorage.getItem("booknook-next");
+        next = sessionStorage.getItem("booknook-next") ?? "";
         sessionStorage.removeItem("booknook-next");
-        router.push(next || "/");
       } catch {
-        router.push("/");
+        // Stash unavailable — fall through to the URL param below.
       }
-    }, 1100);
+
+      // Belt and braces: if the sessionStorage stash was lost between the
+      // mount fold and this point, the URL param still carries the intent.
+      next ||= nextFromUrl();
+
+      // FULL page load, same as login: the client router may still hold a
+      // "redirect to please-login" entry for the destination from before
+      // the user signed up — replaying it would bounce them back and need
+      // a second refresh. A fresh document load carries the new session
+      // cookie straight to the server, which renders the destination.
+      window.location.replace(next || "/");
+    }, 500);
   }
 
   return (
@@ -321,6 +346,16 @@ function RegisterForm() {
           Already have an account?{" "}
           <Link
             href="/login"
+            onClick={(event) => {
+              // Hand the reader's intended destination to /login so a
+              // completed login returns to the same book.
+              const next = nextFromUrl();
+
+              if (next) {
+                event.preventDefault();
+                router.push(`/login?next=${encodeURIComponent(next)}`);
+              }
+            }}
             className="font-semibold text-emerald-600 transition hover:text-emerald-700 dark:text-emerald-300 dark:hover:text-emerald-200"
           >
             Login

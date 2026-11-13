@@ -24,10 +24,10 @@ function PleaseLoginCard() {
   // The server proxy (src/proxy.ts) bounces signed-out visitors here as
   // /please-login?next=… when they open a book details page. Remember the
   // destination the same way the login page does, so BOTH paths offered
-  // below return the reader to the book they wanted: Login reads
-  // booknook-next after signing in, and Register hands off to /login with
-  // the key left intact. Only same-app paths are accepted (no open
-  // redirects via "//" protocol-relative URLs).
+  // below return the reader to the book they wanted — and each button also
+  // re-attaches ?next= at click time, so the intent survives even if
+  // sessionStorage is unavailable or cleared along the way. Only same-app
+  // paths are accepted (no open redirects via "//" protocol-relative URLs).
   useEffect(() => {
     try {
       const next = new URLSearchParams(window.location.search).get("next");
@@ -36,11 +36,36 @@ function PleaseLoginCard() {
         sessionStorage.setItem("booknook-next", next);
       }
     } catch {
-      // Storage unavailable — sign-in simply lands on the home page.
+      // Storage unavailable — the buttons still carry ?next= in the URL.
     }
   }, []);
 
+  // A validated same-app destination from ?next=…, or "" when absent.
+  function nextFromUrl() {
+    try {
+      const next = new URLSearchParams(window.location.search).get("next");
+
+      return next?.startsWith("/") && !next.startsWith("//") ? next : "";
+    } catch {
+      return "";
+    }
+  }
+
+  // Navigate to an auth page, appending ?next=… when a destination exists.
+  function goAuth(event: React.MouseEvent, base: string) {
+    const next = nextFromUrl();
+
+    if (next) {
+      event.preventDefault();
+      router.push(`${base}?next=${encodeURIComponent(next)}`);
+    }
+  }
+
   // Already signed in (stale link) — continue straight to the destination.
+  // Full page load rather than router.replace: the client router cache may
+  // hold a stale "redirect to please-login" entry for the destination URL
+  // from before the visitor signed in; a fresh document load re-runs the
+  // server gate with the session cookie and lands on the page directly.
   useEffect(() => {
     if (!ready || !user) {
       return;
@@ -49,13 +74,13 @@ function PleaseLoginCard() {
     try {
       const next = new URLSearchParams(window.location.search).get("next");
 
-      router.replace(
+      window.location.replace(
         next?.startsWith("/") && !next.startsWith("//") ? next : "/"
       );
     } catch {
-      router.replace("/");
+      window.location.replace("/");
     }
-  }, [ready, user, router]);
+  }, [ready, user]);
 
   return (
     <main className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-16">
@@ -76,6 +101,7 @@ function PleaseLoginCard() {
         <div className="mt-7 grid gap-3">
           <Link
             href="/login"
+            onClick={(event) => goAuth(event, "/login")}
             className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-500"
           >
             <LogIn size={16} />
@@ -84,6 +110,7 @@ function PleaseLoginCard() {
 
           <Link
             href="/register"
+            onClick={(event) => goAuth(event, "/register")}
             className="flex w-full items-center justify-center gap-2 rounded-lg border border-emerald-600/30 bg-emerald-50 px-5 py-2.5 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100 dark:border-emerald-400/30 dark:bg-emerald-400/10 dark:text-emerald-300 dark:hover:bg-emerald-400/20"
           >
             <UserPlus size={16} />

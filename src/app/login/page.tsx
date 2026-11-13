@@ -58,6 +58,17 @@ function LoginForm() {
     }
   }, []);
 
+  // A validated same-app destination from ?next=…, or "" when absent.
+  function nextFromUrl() {
+    try {
+      const next = new URLSearchParams(window.location.search).get("next");
+
+      return next?.startsWith("/") && !next.startsWith("//") ? next : "";
+    } catch {
+      return "";
+    }
+  }
+
   function fail(message: string) {
     setToast({
       type: "error",
@@ -96,13 +107,26 @@ function LoginForm() {
     }
 
     // Signed in — the remembered route (if any) wins, else the home page.
+    // A FULL page load is deliberate (same pattern as logout): while signed
+    // out, the details route may sit in the client router cache as a
+    // redirect to the login page, and a client-side push would replay that
+    // stale redirect (the "needs a second refresh" bug on the deployment).
+    // A fresh document load lets the server see the brand-new session
+    // cookie and renders the destination immediately.
+    let next = "";
+
     try {
-      const next = sessionStorage.getItem("booknook-next");
+      next = sessionStorage.getItem("booknook-next") ?? "";
       sessionStorage.removeItem("booknook-next");
-      router.push(next || "/");
     } catch {
-      router.push("/");
+      // Stash unavailable — fall through to the URL param below.
     }
+
+    // Belt and braces: if the sessionStorage stash was lost between the
+    // mount fold and this point, the URL param still carries the intent.
+    next ||= nextFromUrl();
+
+    window.location.replace(next || "/");
   }
 
   function forgotPassword() {
@@ -193,6 +217,18 @@ function LoginForm() {
           Don&apos;t have an account?{" "}
           <Link
             href="/register"
+            onClick={(event) => {
+              // Hand the reader's intended destination to /register so a
+              // completed registration returns to the same book.
+              const next = nextFromUrl();
+
+              if (next) {
+                event.preventDefault();
+                router.push(
+                  `/register?next=${encodeURIComponent(next)}`
+                );
+              }
+            }}
             className="font-semibold text-emerald-600 transition hover:text-emerald-700 dark:text-emerald-300 dark:hover:text-emerald-200"
           >
             Register

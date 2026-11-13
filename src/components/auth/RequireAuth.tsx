@@ -15,7 +15,10 @@ export default function RequireAuth({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (ready && !user) {
       try {
-        sessionStorage.setItem("booknook-next", window.location.pathname);
+        sessionStorage.setItem(
+          "booknook-next",
+          `${window.location.pathname}${window.location.search}`
+        );
       } catch {
         // Ignore; the user will just land on the home page after login.
       }
